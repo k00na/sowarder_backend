@@ -1,0 +1,21 @@
+sail-up:
+	./vendor/bin/sail up -d
+
+sail-down:
+	./vendor/bin/sail down
+
+sail-ps:
+	./vendor/bin/sail ps
+
+sail-migrate:
+	./vendor/bin/sail artisan migrate
+
+sail-test:
+	./vendor/bin/sail artisan test
+
+sail:
+	./vendor/bin/sail
+
+# After adding Laravel packages, refresh Boost skills/guidelines
+boost-discover:
+	./vendor/bin/sail artisan boost:update --discover
