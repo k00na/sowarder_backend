@@ -48,9 +48,17 @@ class DemoSeederTest extends TestCase
 
         $this->assertSame(3, DiningTable::query()->where('restaurant_id', $coral->id)->count());
         $this->assertSame(2, DiningTable::query()->where('restaurant_id', $harbor->id)->count());
+        $this->assertSame(
+            DemoRestaurantSeeder::HARBOR_GRILL_A1_TOKEN,
+            DiningTable::query()
+                ->where('restaurant_id', $harbor->id)
+                ->where('label', DemoRestaurantSeeder::HARBOR_GRILL_A1_LABEL)
+                ->value('token'),
+        );
 
         $this->assertSame(4, Product::query()->where('restaurant_id', $coral->id)->count());
-        $this->assertSame(4, Product::query()->where('restaurant_id', $harbor->id)->count());
+        $this->assertSame(29, Product::query()->where('restaurant_id', $harbor->id)->count());
+        $this->assertSame(7, $harbor->menuCategories()->count());
 
         $this->assertSame(0, Product::query()
             ->where('restaurant_id', $coral->id)
@@ -77,5 +85,30 @@ class DemoSeederTest extends TestCase
         $this->assertSame(2, Restaurant::query()->count());
         $this->assertSame(1, TableSession::query()->where('status', SessionStatus::Open)->count());
         $this->assertSame(1, Order::query()->count());
+        $this->assertSame(
+            DemoRestaurantSeeder::HARBOR_GRILL_A1_TOKEN,
+            DiningTable::query()
+                ->where('label', DemoRestaurantSeeder::HARBOR_GRILL_A1_LABEL)
+                ->whereHas('restaurant', fn ($query) => $query->where('slug', DemoRestaurantSeeder::HARBOR_GRILL_SLUG))
+                ->value('token'),
+        );
+    }
+
+    #[Test]
+    public function demo_harbor_a1_token_command_updates_an_existing_row(): void
+    {
+        $this->seed(DemoRestaurantSeeder::class);
+
+        $table = DiningTable::query()
+            ->where('label', DemoRestaurantSeeder::HARBOR_GRILL_A1_LABEL)
+            ->whereHas('restaurant', fn ($query) => $query->where('slug', DemoRestaurantSeeder::HARBOR_GRILL_SLUG))
+            ->firstOrFail();
+
+        $table->update(['token' => 'previously-random-harbor-a1-token-00000000']);
+
+        $this->artisan('sowarder:demo-harbor-a1-token')
+            ->assertSuccessful();
+
+        $this->assertSame(DemoRestaurantSeeder::HARBOR_GRILL_A1_TOKEN, $table->fresh()->token);
     }
 }

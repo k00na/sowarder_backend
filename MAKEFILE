@@ -13,6 +13,10 @@ sail-migrate:
 sail-test:
 	./vendor/bin/sail artisan test
 
+# Existing DBs: Harbor Grill A1 → token `test` (fresh seeds already set this).
+demo-test-token:
+	./vendor/bin/sail artisan sowarder:demo-harbor-a1-token
+
 sail:
 	./vendor/bin/sail
 
