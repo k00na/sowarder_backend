@@ -11,6 +11,7 @@ use App\Models\Product;
 use App\Models\Restaurant;
 use App\Models\TableSession;
 use Illuminate\Foundation\Testing\RefreshDatabase;
+use Illuminate\Support\Facades\Storage;
 use Illuminate\Support\Str;
 use PHPUnit\Framework\Attributes\Test;
 use Tests\TestCase;
@@ -18,6 +19,68 @@ use Tests\TestCase;
 class GuestMenuAndOrderTest extends TestCase
 {
     use RefreshDatabase;
+
+    #[Test]
+    public function menu_returns_relative_public_disk_urls_on_localhost(): void
+    {
+        $restaurant = Restaurant::factory()->create([
+            'name' => 'Test Diner',
+            'logo_path' => 'restaurants/logos/diner.png',
+        ]);
+        $table = DiningTable::factory()->create(['restaurant_id' => $restaurant->id, 'label' => 'T1']);
+        $category = MenuCategory::factory()->create(['restaurant_id' => $restaurant->id]);
+        Product::factory()->forRestaurant($restaurant, $category)->create([
+            'is_available' => true,
+            'image_path' => 'products/images/item.jpg',
+        ]);
+
+        $this->assertSame('/storage', config('filesystems.disks.public.url'));
+
+        $this->getJson("/api/v1/guest/tables/{$table->token}/menu")
+            ->assertOk()
+            ->assertJsonPath('restaurant.logo_url', '/storage/restaurants/logos/diner.png')
+            ->assertJsonPath('categories.0.products.0.image_url', '/storage/products/images/item.jpg');
+    }
+
+    #[Test]
+    public function menu_returns_absolute_public_disk_urls_when_configured(): void
+    {
+        config(['filesystems.disks.public.url' => 'https://cdn.example.com/media']);
+        Storage::forgetDisk('public');
+
+        $restaurant = Restaurant::factory()->create([
+            'logo_path' => 'restaurants/logos/diner.png',
+        ]);
+        $table = DiningTable::factory()->create(['restaurant_id' => $restaurant->id]);
+        $category = MenuCategory::factory()->create(['restaurant_id' => $restaurant->id]);
+        Product::factory()->forRestaurant($restaurant, $category)->create([
+            'is_available' => true,
+            'image_path' => 'products/images/item.jpg',
+        ]);
+
+        $this->getJson("/api/v1/guest/tables/{$table->token}/menu")
+            ->assertOk()
+            ->assertJsonPath('restaurant.logo_url', 'https://cdn.example.com/media/restaurants/logos/diner.png')
+            ->assertJsonPath('categories.0.products.0.image_url', 'https://cdn.example.com/media/products/images/item.jpg');
+    }
+
+    #[Test]
+    public function menu_resolves_a_short_demo_token(): void
+    {
+        $restaurant = Restaurant::factory()->create(['name' => 'Harbor Grill']);
+        $table = DiningTable::factory()->create([
+            'restaurant_id' => $restaurant->id,
+            'label' => 'A1',
+            'token' => 'test',
+        ]);
+
+        $this->assertSame('test', $table->token);
+
+        $this->getJson('/api/v1/guest/tables/test/menu')
+            ->assertOk()
+            ->assertJsonPath('restaurant.name', 'Harbor Grill')
+            ->assertJsonPath('table.label', 'A1');
+    }
 
     #[Test]
     public function menu_returns_branding_and_available_products_only(): void

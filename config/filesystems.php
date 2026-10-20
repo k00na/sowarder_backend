@@ -1,5 +1,7 @@
 <?php
 
+use App\Support\PublicDiskUrl;
+
 return [
 
     /*
@@ -41,12 +43,18 @@ return [
         /*
          * Publicly served uploads (restaurant logos, product images).
          * Local Sail: `sail artisan storage:link` → public/storage → storage/app/public.
-         * Pilot: may use the `s3` disk instead; keep Filament FileUpload disk explicit.
+         * When APP_URL is localhost, Storage::url() is relative `/storage/...` so the
+         * guest Vite proxy can serve images on phones without baking a LAN IP.
+         * Non-local APP_URL keeps `{APP_URL}/storage` (pilot / production).
+         * Override with FILESYSTEM_PUBLIC_URL. S3 uses the `s3` disk, not this url.
          */
         'public' => [
             'driver' => 'local',
             'root' => storage_path('app/public'),
-            'url' => rtrim(env('APP_URL', 'http://localhost'), '/').'/storage',
+            'url' => PublicDiskUrl::resolve(
+                env('FILESYSTEM_PUBLIC_URL'),
+                (string) env('APP_URL', 'http://localhost'),
+            ),
             'visibility' => 'public',
             'throw' => false,
             'report' => false,
