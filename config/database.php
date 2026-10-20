@@ -86,7 +86,13 @@ return [
 
         'pgsql' => [
             'driver' => 'pgsql',
-            'url' => env('DB_URL'),
+            // Neon (demo deploy): Render sets DATABASE_URL (pooled) — Laravel
+            // apps normally read DB_URL, so fall back to Neon's var name.
+            // DB_URL wins when set (deploy entrypoint points it at
+            // DATABASE_URL_UNPOOLED for migrations; phpunit sets it empty).
+            // Local Sail is unaffected: .env has no DATABASE_URL (Neon vars
+            // live in .env.neon, which Laravel does not load).
+            'url' => env('DB_URL') ?: env('DATABASE_URL'),
             'host' => env('DB_HOST', '127.0.0.1'),
             'port' => env('DB_PORT', '5432'),
             'database' => env('DB_DATABASE', 'laravel'),

@@ -18,7 +18,10 @@ return Application::configure(basePath: dirname(__DIR__))
         health: '/up',
     )
     ->withMiddleware(function (Middleware $middleware): void {
-        //
+        // Render (and any TLS-terminating reverse proxy) sets X-Forwarded-*.
+        // Without this, Filament login cookies/CSRF treat the request as http
+        // and bounce the user back to the login form.
+        $middleware->trustProxies(at: '*');
     })
     ->withExceptions(function (Exceptions $exceptions): void {
         $exceptions->shouldRenderJsonWhen(
