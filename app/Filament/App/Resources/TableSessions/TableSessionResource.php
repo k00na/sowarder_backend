@@ -89,27 +89,20 @@ class TableSessionResource extends Resource
         return $table
             ->defaultSort('opened_at', 'desc')
             ->columns([
-                TextColumn::make('id')
-                    ->label('Session ID')
-                    ->limit(8)
-                    ->tooltip(fn (TableSession $record): string => $record->id)
-                    ->copyable(),
                 TextColumn::make('diningTable.label')
                     ->label('Table')
                     ->sortable(),
-                TextColumn::make('status')
-                    ->badge()
-                    ->sortable(),
                 TextColumn::make('opened_at')
-                    ->dateTime()
+                    ->dateTime('M j, Y H:i:s')
                     ->sortable(),
                 TextColumn::make('ended_at')
-                    ->dateTime()
+                    ->dateTime('M j, Y H:i:s')
                     ->placeholder('—')
                     ->sortable(),
-                IconColumn::make('ended_with_unacknowledged')
-                    ->label('Ended unacked')
-                    ->boolean(),
+                IconColumn::make('has_ended')
+                    ->label('Has ended')
+                    ->boolean()
+                    ->getStateUsing(fn (TableSession $record): bool => $record->status === SessionStatus::Ended),
             ])
             ->filters([
                 SelectFilter::make('status')

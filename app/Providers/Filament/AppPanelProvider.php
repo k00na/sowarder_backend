@@ -3,6 +3,7 @@
 namespace App\Providers\Filament;
 
 use App\Filament\App\Pages\ManageRestaurantSettings;
+use App\Filament\Auth\Login;
 use App\Http\Controllers\App\CashierPreviewController;
 use App\Http\Controllers\App\DiningTableQrController;
 use App\Http\Controllers\App\GuestMenuPreviewController;
@@ -16,7 +17,6 @@ use Filament\Navigation\NavigationItem;
 use Filament\Pages\Dashboard;
 use Filament\Panel;
 use Filament\PanelProvider;
-use Filament\Support\Colors\Color;
 use Filament\Support\Icons\Heroicon;
 use Filament\Widgets\AccountWidget;
 use Illuminate\Cookie\Middleware\AddQueuedCookiesToResponse;
@@ -31,16 +31,13 @@ class AppPanelProvider extends PanelProvider
 {
     public function panel(Panel $panel): Panel
     {
-        return $panel
+        return ConfiguresPanelAppearance::apply($panel)
             ->id('app')
             ->path('app')
-            ->login()
+            ->login(Login::class)
             ->tenant(Restaurant::class, slugAttribute: 'slug', ownershipRelationship: 'restaurant')
             ->tenantMenu(false)
             ->tenantProfile(ManageRestaurantSettings::class)
-            ->colors([
-                'primary' => Color::Teal,
-            ])
             ->discoverResources(in: app_path('Filament/App/Resources'), for: 'App\\Filament\\App\\Resources')
             ->discoverPages(in: app_path('Filament/App/Pages'), for: 'App\\Filament\\App\\Pages')
             ->pages([

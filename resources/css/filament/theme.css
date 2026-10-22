@@ -1,0 +1,128 @@
+@import '../../../vendor/filament/filament/resources/css/theme.css';
+
+@source '../../../app/Filament/**/*';
+@source '../../../resources/views/filament/**/*';
+
+.fi-body {
+    background-color: #faf8ff;
+    color: #191b22;
+}
+
+.fi-logo {
+    height: auto !important;
+}
+
+.fi-header-heading,
+.fi-simple-header-heading,
+.fi-brand-name,
+.fi-brand-mark {
+    font-family: var(--serif-font-family), 'Plus Jakarta Sans', sans-serif;
+}
+
+.fi-header-heading,
+.fi-simple-header-heading {
+    color: #191b22;
+}
+
+.fi-brand {
+    display: flex;
+    align-items: center;
+    gap: 0.5rem;
+}
+
+.fi-brand-mark {
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    width: 2rem;
+    height: 2rem;
+    border-radius: 9999px;
+    background: #0056c5;
+    color: #fff;
+    font-size: 0.95rem;
+    font-weight: 700;
+    line-height: 1;
+}
+
+.fi-brand-name {
+    color: #191b22;
+    font-size: 1.125rem;
+    font-weight: 700;
+    letter-spacing: -0.02em;
+    line-height: 1;
+}
+
+.fi-sidebar {
+    background-color: #fff;
+    box-shadow: 1px 0 0 rgb(194 198 214 / 0.9);
+}
+
+.fi-sidebar-group-label {
+    color: #6b7280;
+    font-size: 0.6875rem;
+    font-weight: 600;
+    letter-spacing: 0.08em;
+    text-transform: uppercase;
+}
+
+.fi-sidebar-item.fi-active > .fi-sidebar-item-btn {
+    background-color: var(--primary-50, #e8f0ff);
+}
+
+.fi-sidebar-item.fi-active > .fi-sidebar-item-btn > .fi-icon,
+.fi-sidebar-item.fi-active > .fi-sidebar-item-btn > .fi-sidebar-item-label {
+    color: var(--primary-700, #0056c5);
+}
+
+.fi-btn.fi-color-primary:not(.fi-outlined):not(label) {
+    background-color: #0056c5;
+    color: #fff;
+}
+
+.fi-btn.fi-color-primary:not(.fi-outlined):not(label):not(:disabled):not(.fi-disabled):hover,
+.fi-btn.fi-color-primary:not(.fi-outlined):not(label).fi-force-enabled:hover {
+    background-color: #004aad;
+    color: #fff;
+}
+
+.fi-btn.fi-color-primary:not(.fi-outlined):not(label) > .fi-icon {
+    color: #fff;
+}
+
+.fi-resource-restaurants.fi-resource-create-record-page .fi-page-content,
+.fi-resource-restaurants.fi-resource-edit-record-page .fi-page-content {
+    background-color: #fff;
+    border-radius: 1rem;
+    padding: 1.75rem 1.5rem 1.5rem;
+    box-shadow: 0 12px 32px rgb(25 27 34 / 0.05);
+}
+
+.fi-resource-restaurants .fi-ta-table .fi-badge.fi-color-success {
+    border-radius: 9999px;
+    background-color: #e7f6ee;
+    color: #0f6b4c;
+    box-shadow: none;
+    gap: 0.4rem;
+    padding-inline: 0.6rem 0.7rem;
+}
+
+.fi-resource-restaurants .fi-ta-table .fi-badge.fi-color-success::before {
+    content: '';
+    width: 0.42rem;
+    height: 0.42rem;
+    flex-shrink: 0;
+    border-radius: 9999px;
+    background-color: currentColor;
+}
+
+.fi-resource-restaurants .fi-ta-table .fi-badge.fi-color-info {
+    background-color: #e8f0ff;
+    color: #1d4e9c;
+    box-shadow: none;
+}
+
+.fi-resource-restaurants .fi-ta-table .fi-badge.fi-color-warning {
+    background-color: #fff4e5;
+    color: #9a5b00;
+    box-shadow: none;
+}

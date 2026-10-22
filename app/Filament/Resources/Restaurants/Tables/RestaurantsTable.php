@@ -2,6 +2,8 @@
 
 namespace App\Filament\Resources\Restaurants\Tables;
 
+use App\Enums\Currency;
+use App\Enums\RestaurantStatus;
 use Filament\Actions\EditAction;
 use Filament\Actions\ViewAction;
 use Filament\Tables\Columns\ColorColumn;
@@ -22,9 +24,17 @@ class RestaurantsTable
                     ->copyable(),
                 TextColumn::make('status')
                     ->badge()
+                    ->color(fn (RestaurantStatus $state): string => match ($state) {
+                        RestaurantStatus::Enabled => 'success',
+                        RestaurantStatus::Disabled => 'gray',
+                    })
                     ->sortable(),
                 TextColumn::make('currency')
                     ->badge()
+                    ->color(fn (Currency $state): string => match ($state) {
+                        Currency::Mvr => 'info',
+                        Currency::Usd => 'warning',
+                    })
                     ->sortable(),
                 TextColumn::make('timezone')
                     ->toggleable(),
