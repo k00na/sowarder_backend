@@ -3,7 +3,22 @@
 # Local development still uses Sail (compose.yaml) — do not use this for dev.
 # See docs/todos/demo_deployment/demo_deploy.md
 
-# ---------- Stage 1: Vite assets ----------
+# ---------- Stage 1: Composer packages ----------
+# The Filament theme imports CSS from vendor/filament, and Tailwind scans
+# app/Filament. Those files only exist after Composer install. This vendor
+# tree is for the asset build; the runtime stage installs again so the
+# autoloader is generated with the application source present.
+FROM composer:2 AS vendor
+WORKDIR /app
+COPY composer.json composer.lock ./
+RUN composer install \
+    --no-dev \
+    --no-interaction \
+    --no-scripts \
+    --no-autoloader \
+    --ignore-platform-reqs
+
+# ---------- Stage 2: Vite assets ----------
 FROM node:24-bookworm-slim AS assets
 WORKDIR /app
 # Do not copy .npmrc (ignore-scripts=true) — Vite/Rolldown needs native bindings.
@@ -11,10 +26,12 @@ COPY package.json package-lock.json ./
 RUN npm ci
 COPY vite.config.js ./
 COPY resources ./resources
+COPY app ./app
 COPY public ./public
+COPY --from=vendor /app/vendor ./vendor
 RUN npm run build
 
-# ---------- Stage 2: PHP runtime ----------
+# ---------- Stage 3: PHP runtime ----------
 FROM php:8.4-apache-bookworm AS runtime
 
 RUN set -eux; \
