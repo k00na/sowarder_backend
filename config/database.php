@@ -103,6 +103,13 @@ return [
             'prefix_indexes' => true,
             'search_path' => 'public',
             'sslmode' => env('DB_SSLMODE', 'prefer'),
+            // Neon’s pooled DATABASE_URL is PgBouncer in transaction mode, which
+            // rejects server-side prepared statements. Login rate limiting then
+            // dies inside a cache transaction (SQLSTATE 25P02). Emulated prepares
+            // send ordinary statements and still work against Sail’s Postgres.
+            'options' => extension_loaded('pdo_pgsql') ? [
+                PDO::ATTR_EMULATE_PREPARES => true,
+            ] : [],
         ],
 
         'sqlsrv' => [
