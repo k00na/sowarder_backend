@@ -431,4 +431,50 @@ class GuestMenuAndOrderTest extends TestCase
             ->assertJsonPath('error.code', 'rate_limited')
             ->assertHeader('Retry-After');
     }
+
+    #[Test]
+    public function menu_get_echoes_the_allowed_guest_origin(): void
+    {
+        $table = DiningTable::factory()->create();
+
+        // Default CORS_ALLOWED_ORIGINS in tests is the local guest origin.
+        $this->getJson("/api/v1/guest/tables/{$table->token}/menu", [
+            'Origin' => 'http://localhost:5173',
+        ])
+            ->assertOk()
+            ->assertHeader('Access-Control-Allow-Origin', 'http://localhost:5173');
+    }
+
+    #[Test]
+    public function order_preflight_allows_the_guest_origin(): void
+    {
+        $table = DiningTable::factory()->create();
+
+        $this->call('OPTIONS', "/api/v1/guest/tables/{$table->token}/orders", [], [], [], [
+            'HTTP_ORIGIN' => 'http://localhost:5173',
+            'HTTP_ACCESS_CONTROL_REQUEST_METHOD' => 'POST',
+            'HTTP_ACCESS_CONTROL_REQUEST_HEADERS' => 'content-type',
+        ])
+            ->assertNoContent()
+            ->assertHeader('Access-Control-Allow-Origin', 'http://localhost:5173')
+            ->assertHeader('Access-Control-Allow-Methods', 'POST');
+    }
+
+    #[Test]
+    public function menu_get_does_not_echo_a_disallowed_origin(): void
+    {
+        $table = DiningTable::factory()->create();
+
+        $response = $this->getJson("/api/v1/guest/tables/{$table->token}/menu", [
+            'Origin' => 'https://evil.example.com',
+        ])->assertOk();
+
+        // The server may still advertise its configured origin; the browser
+        // blocks the read unless the header matches the page origin. The
+        // security property is that a disallowed origin is never echoed.
+        $this->assertNotSame(
+            'https://evil.example.com',
+            $response->headers->get('Access-Control-Allow-Origin'),
+        );
+    }
 }
